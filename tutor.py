@@ -43,6 +43,9 @@ foto_subida = st.file_uploader("📸 [PREMIUM] Sube la foto de tu ejercicio o ta
 # --- CHAT INTERACTIVO ---
 if prompt := st.chat_input("Escribe tu pregunta aquí..."):
     
+    # Creamos el cliente AQUÍ ARRIBA para que funcione en ambos casos
+    client = genai.Client(api_key=st.secrets["API_KEY"])
+    
     # CASO 1: El usuario subió una foto (Función Premium)
     if foto_subida is not None:
         st.info("🔮 Procesando archivo como usuario Premium...")
@@ -51,7 +54,7 @@ if prompt := st.chat_input("Escribe tu pregunta aquí..."):
         
         # Enviar texto + imagen a Gemini
         contenido_bomba = [prompt, imagen]
-        client = genai.Client(api_key=st.secrets["API_KEY"])
+        
         response = client.models.generate_content(
             model='gemini-2.5-flash',
             contents=contenido_bomba,
@@ -76,7 +79,7 @@ if prompt := st.chat_input("Escribe tu pregunta aquí..."):
             config=genai.types.GenerateContentConfig(
                 system_instruction="""
                 Eres Tutor IA, un mentor universitario experto en Contabilidad, Derecho Fiscal y Diseño Organizacional.
-                Explica de forma clara y estructurada.
+                Explica de forma clara, usando negritas y listas estructuradas para ayudar al estudiante.
                 """
             )
         )
