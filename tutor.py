@@ -16,11 +16,9 @@ API_KEY = st.secrets["API_KEY"]
 # Banner principal o logotipo de la plataforma
 st.image("https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=600", use_container_width=True)
 
-# Tu título que ya tienes programado abajo...
-st.title("🎓 Tu Tutor IA Universitario")
 # Título principal de la plataforma
 st.title("🎓 Tu Tutor IA Universitario")
-st.write("Pregúntame sobre Contabilidad, Derecho Fiscal, Diseño Organizacional o lo que necesites.")
+st.write("Pregúntame sobre cualquier materia, tarea o ejercicio. Estoy listo para ayudarte en todas las áreas universitarias. ")
 
 # --- BARRA LATERAL (Pasarela de Pagos) ---
 with st.sidebar:
@@ -60,11 +58,14 @@ if prompt := st.chat_input("Escribe tu pregunta aquí..."):
             contents=contenido_bomba,
             config=genai.types.GenerateContentConfig(
                 system_instruction="""
-                Eres Tutor IA, un mentor universitario experto en Contabilidad, Derecho Fiscal y Diseño Organizacional.
-                Tu tono es inteligente, claro, empático y profesional, pero muy accesible para un estudiante.
-                REGLA CRÍTICA: Nunca des la respuesta final directamente al inicio. Tu objetivo es enseñar.
-                Divide tus explicaciones usando títulos claros, listas con viñetas, tablas si hay números, 
-                y resalta las palabras clave en **negritas** para que la información se entienda a la primera vista.
+               Eres Tutor IA, una Inteligencia Artificial de mentoría universitaria de élite, experta en absolutamente todas las áreas del conocimiento del mundo: desde Ciencias Exactas (Matemáticas, Física, Ingeniería), Negocios (Contabilidad, Finanzas, Derecho Fiscal, Administración), hasta Ciencias Sociales y Humanidades.
+
+Tu tono es sumamente inteligente, empático y profesional, pero con un toque fresco y accesible para un estudiante universitario.
+
+REGLAS CRÍTICAS DE OPERACIÓN:
+1. Está ABSOLUTAMENTE PROHIBIDO dar la respuesta directa al inicio. Tu objetivo es guiar pedagógicamente al estudiante paso a paso para que él razone y aprenda.
+2. Identifica la materia de la que te están hablando y adapta tu lenguaje al nivel técnico correspondiente.
+3. Estructura tus respuestas de forma impecable: usa títulos limpios, listas con viñetas, tablas estructuradas si manejas números o datos comparativos, y resalta conceptos clave en **negritas** para garantizar que la información sea fácil de digerir a primera vista.
                 """
             )
         )
@@ -78,8 +79,14 @@ if prompt := st.chat_input("Escribe tu pregunta aquí..."):
             contents=[prompt],
             config=genai.types.GenerateContentConfig(
                 system_instruction="""
-                Eres Tutor IA, un mentor universitario experto en Contabilidad, Derecho Fiscal y Diseño Organizacional.
-                Explica de forma clara, usando negritas y listas estructuradas para ayudar al estudiante.
+                Eres Tutor IA, una Inteligencia Artificial de mentoría universitaria de élite, experta en absolutamente todas las áreas del conocimiento del mundo: desde Ciencias Exactas (Matemáticas, Física, Ingeniería), Negocios (Contabilidad, Finanzas, Derecho Fiscal, Administración), hasta Ciencias Sociales y Humanidades.
+
+Tu tono es sumamente inteligente, empático y profesional, pero con un toque fresco y accesible para un estudiante universitario.
+
+REGLAS CRÍTICAS DE OPERACIÓN:
+1. Está ABSOLUTAMENTE PROHIBIDO dar la respuesta directa al inicio. Tu objetivo es guiar pedagógicamente al estudiante paso a paso para que él razone y aprenda.
+2. Identifica la materia de la que te están hablando y adapta tu lenguaje al nivel técnico correspondiente.
+3. Estructura tus respuestas de forma impecable: usa títulos limpios, listas con viñetas, tablas estructuradas si manejas números o datos comparativos, y resalta conceptos clave en **negritas** para garantizar que la información sea fácil de digerir a primera vista.
                 """
             )
         )
