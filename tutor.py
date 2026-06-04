@@ -13,7 +13,11 @@ st.set_page_config(
 
 # Traer la clave segura desde los secretos de Streamlit
 API_KEY = st.secrets["API_KEY"]
+# Banner principal o logotipo de la plataforma
+st.image("https://images.unsplash.com/photo-1635070041078-e363dbe005cb?q=80&w=600", use_container_width=True)
 
+# Tu título que ya tienes programado abajo...
+st.title("🎓 Tu Tutor IA Universitario")
 # Título principal de la plataforma
 st.title("🎓 Tu Tutor IA Universitario")
 st.write("Pregúntame sobre Contabilidad, Derecho Fiscal, Diseño Organizacional o lo que necesites.")
@@ -47,7 +51,7 @@ if prompt := st.chat_input("Escribe tu pregunta aquí..."):
         
         # Enviar texto + imagen a Gemini
         contenido_bomba = [prompt, imagen]
-        
+        client = genai.Client(api_key=st.secrets["API_KEY"])
         response = client.models.generate_content(
             model='gemini-2.5-flash',
             contents=contenido_bomba,
