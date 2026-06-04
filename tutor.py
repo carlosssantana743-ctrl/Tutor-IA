@@ -2,8 +2,14 @@ import streamlit as st
 from google import genai
 from PIL import Image
 
-# Configuración inicial de la página
-st.set_page_config(page_title="Tutor IA - Universidad", layout="centered")
+# Esta configuración SIEMPRE va primero, solita y una sola vez
+st.set_page_config(
+    page_title="Tutor IA - Universidad", 
+    page_icon="🧠", 
+    layout="centered"
+)
+
+# El resto de tu código continúa abajo...
 
 # Traer la clave segura desde los secretos de Streamlit
 API_KEY = st.secrets["API_KEY"]
@@ -30,38 +36,44 @@ with st.sidebar:
 # --- SECCIÓN EXCLUSIVA PREMIUM: CARGADOR DE FOTOS ---
 st.write("---")
 foto_subida = st.file_uploader("📸 [PREMIUM] Sube la foto de tu ejercicio o tarea", type=["jpg", "jpeg", "png"])
-
 # --- CHAT INTERACTIVO ---
 if prompt := st.chat_input("Escribe tu pregunta aquí..."):
     
-    # Caso 1: El usuario intentó subir una foto (Función Premium)
+    # CASO 1: El usuario subió una foto (Función Premium)
     if foto_subida is not None:
-        st.warning("⚠️ La lectura de imágenes es una función exclusiva de **Tutor IA Premium**.")
-        st.write("Para desbloquear esta herramienta y dejar que la IA resuelva tus ejercicios con solo una foto, suscríbete en la barra lateral por solo **$25 MXN al mes**.")
-        st.write("Una vez que te hayas suscrito, escribe abajo: **'Activar mi pase Premium'** seguido de tu duda para procesar la imagen.")
+        st.info("🔮 Procesando archivo como usuario Premium...")
+        imagen = Image.open(foto_subida)
+        st.image(imagen, caption="📷 Tarea cargada correctamente", use_container_width=True)
         
-        # Si el usuario ya pagó y escribe la palabra clave, lo dejamos pasar
-        if "Activar mi pase Premium" in prompt:
-            st.info("🔄 Procesando archivo como usuario Premium...")
-            imagen = Image.open(foto_subida)
-            st.image(imagen, caption="📄 Tarea cargada correctamente", use_container_width=True)
-            
-            # Enviar texto + imagen a Gemini
-            contenido_bomba = [prompt.replace("Activar mi pase Premium", ""), imagen]
-            
-            client = genai.Client(api_key=API_KEY)
-            response = client.models.generate_content(
-                model='gemini-2.5-flash',
-                contents=contenido_bomba
-            )
-            st.success("🤖 Respuesta del Tutor Premium:")
-            st.write(response.text)
-            
-    # Caso 2: Es una pregunta normal de texto (Abierto para todos)
-    else:
-        client = genai.Client(api_key=API_KEY)
+        # Enviar texto + imagen a Gemini
+        contenido_bomba = [prompt, imagen]
+        
         response = client.models.generate_content(
             model='gemini-2.5-flash',
-            contents=[prompt]
+            contents=contenido_bomba,
+            config=genai.types.GenerateContentConfig(
+                system_instruction="""
+                Eres Tutor IA, un mentor universitario experto en Contabilidad, Derecho Fiscal y Diseño Organizacional.
+                Tu tono es inteligente, claro, empático y profesional, pero muy accesible para un estudiante.
+                REGLA CRÍTICA: Nunca des la respuesta final directamente al inicio. Tu objetivo es enseñar.
+                Divide tus explicaciones usando títulos claros, listas con viñetas, tablas si hay números, 
+                y resalta las palabras clave en **negritas** para que la información se entienda a la primera vista.
+                """
+            )
+        )
+        st.success("🤖 Respuesta del Tutor Premium:")
+        st.write(response.text)
+
+    # CASO 2: Es una pregunta normal de texto (Abierto para todos)
+    else:
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=[prompt],
+            config=genai.types.GenerateContentConfig(
+                system_instruction="""
+                Eres Tutor IA, un mentor universitario experto en Contabilidad, Derecho Fiscal y Diseño Organizacional.
+                Explica de forma clara y estructurada.
+                """
+            )
         )
         st.write(response.text)
