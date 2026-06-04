@@ -1,86 +1,67 @@
-import os
 import streamlit as st
 from google import genai
-from google.genai import types
+from PIL import Image
 
-# 1. Tu Llave API (Pon la tuya entre las comillas)
-API_KEY = "AQ.Ab8RN6LOOyXiyzF_0RKCFKdad2ST93JCLH9JErMyDDPwqm1Rqw"
+# Configuración inicial de la página
+st.set_page_config(page_title="Tutor IA - Universidad", layout="centered")
 
-# Configurar la página web (Título e Icono en la pestaña)
-st.set_page_config(page_title="Tutor IA - Universidad", page_icon="🎓")
+# Traer la clave segura desde los secretos de Streamlit
+API_KEY = st.secrets["API_KEY"]
 
-# Inicializar el cliente de Google
-@st.cache_resource
-def get_genai_client():
-    return genai.Client(api_key=API_KEY)
+# Título principal de la plataforma
+st.title("🎓 Tu Tutor IA Universitario")
+st.write("Pregúntame sobre Contabilidad, Derecho Fiscal, Diseño Organizacional o lo que necesites.")
 
-client = get_genai_client()
-
-# 2. El Guion del Tutor Socrático
-SYSTEM_PROMPT = """
-Eres un Tutor de Meta-Aprendizaje experto para estudiantes universitarios. Tu único objetivo es guiarlos para que resuelvan sus tareas por sí mismos.
-REGLA DE ORO: Está ABSOLUTAMENTE PROHIBIDO dar la respuesta final, resolver el problema o dar el resultado masticado.
-Metodología: Guía paso a paso haciendo preguntas como "¿Qué tipo de problema es este?", "¿Qué fórmulas aplican?", "¿Dónde te trabaste?".
-"""
-
-# Barra lateral informativa y de MONETIZACIÓN
+# --- BARRA LATERAL (Pasarela de Pagos) ---
 with st.sidebar:
-    st.title("Plan Premium")
-    st.write("¿Necesitas salvar la materia? Desbloquea el acceso ilimitado hoy mismo.")
+    st.title("Plan Premium 🚀")
+    st.write("¿Necesitas salvar la materia? Desbloquea las funciones exclusivas hoy mismo.")
     
     st.metric(label="Precio Especial", value="$25 MXN", delta="Al mes")
-    st.write("Tendrás soporte paso a paso de tu Tutor IA las 24 horas del día.")
+    st.write("✨ Beneficio Premium: ¡Sube fotos de tus tareas, balances o ejercicios y la IA los resolverá paso a paso!")
     
-    # Pon tu link de Stripe aquí en medio de las comillas
+    # Tu enlace oficial de Stripe
     LINK_DE_STRIPE = "https://buy.stripe.com/test_6oUcN54bD4YqeuGf5YdMI00"
     
     st.link_button("🚀 Suscribirme Ahora", LINK_DE_STRIPE, type="primary")
     st.divider()
-    st.caption("Pagos seguros procesados por Stripe.")
-    st.title("Plan Premium")
-    st.write("¿Necesitas salvar la materia? Desbloquea el acceso ilimitado hoy mismo.")
-    
-    st.metric(label="Precio Especial", value="$25 MXN", delta="Al mes")
-    st.write("Tendrás soporte paso a paso de tu Tutor IA las 24 horas del día.")
-    
-    # Pon tu link de Stripe aquí en medio de las comillas
-    LINK_DE_STRIPE = "https://buy.stripe.com/test_6oUcN54bD4YqeuGf5YdMI0"
-    
-    st.link_button("🚀 Suscribirme Ahora", LINK_DE_STRIPE, type="primary")
-    st.divider()
-    st.caption("Pagos seguros procesados por Stripe.")
+    st.caption("🔒 Pagos seguros procesados por Stripe.")
 
-st.title("🤖 Tu Tutor Universitario Paso a Paso")
-st.write("Cuéntame en qué materia o tarea estás atorado hoy. ¡Vamos a resolverlo juntos!")
+# --- SECCIÓN EXCLUSIVA PREMIUM: CARGADOR DE FOTOS ---
+st.write("---")
+foto_subida = st.file_uploader("📸 [PREMIUM] Sube la foto de tu ejercicio o tarea", type=["jpg", "jpeg", "png"])
 
-# Inicializar el historial del chat si no existe
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-    # Crear el chat con el prompt del sistema
-    st.session_state.chat = client.chats.create(
-        model="gemini-2.5-flash",
-        config=types.GenerateContentConfig(
-            system_instruction=SYSTEM_PROMPT,
-            temperature=0.7,
+# --- CHAT INTERACTIVO ---
+if prompt := st.chat_input("Escribe tu pregunta aquí..."):
+    
+    # Caso 1: El usuario intentó subir una foto (Función Premium)
+    if foto_subida is not None:
+        st.warning("⚠️ La lectura de imágenes es una función exclusiva de **Tutor IA Premium**.")
+        st.write("Para desbloquear esta herramienta y dejar que la IA resuelva tus ejercicios con solo una foto, suscríbete en la barra lateral por solo **$25 MXN al mes**.")
+        st.write("Una vez que te hayas suscrito, escribe abajo: **'Activar mi pase Premium'** seguido de tu duda para procesar la imagen.")
+        
+        # Si el usuario ya pagó y escribe la palabra clave, lo dejamos pasar
+        if "Activar mi pase Premium" in prompt:
+            st.info("🔄 Procesando archivo como usuario Premium...")
+            imagen = Image.open(foto_subida)
+            st.image(imagen, caption="📄 Tarea cargada correctamente", use_container_width=True)
+            
+            # Enviar texto + imagen a Gemini
+            contenido_bomba = [prompt.replace("Activar mi pase Premium", ""), imagen]
+            
+            client = genai.Client(api_key=API_KEY)
+            response = client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=contenido_bomba
+            )
+            st.success("🤖 Respuesta del Tutor Premium:")
+            st.write(response.text)
+            
+    # Caso 2: Es una pregunta normal de texto (Abierto para todos)
+    else:
+        client = genai.Client(api_key=API_KEY)
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=[prompt]
         )
-    )
-
-# Mostrar los mensajes anteriores del chat en la pantalla
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
-
-# Caja de texto para que el usuario escriba abajo (Como WhatsApp)
-if prompt := st.chat_input("¿En qué te puedo ayudar con tu tarea?"):
-    # Mostrar el mensaje del usuario
-    with st.chat_message("user"):
-        st.markdown(prompt)
-    st.session_state.messages.append({"role": "user", "content": prompt})
-
-    # Enviar el mensaje a la IA y obtener respuesta
-    respuesta = st.session_state.chat.send_message(prompt)
-    
-    # Mostrar la respuesta del Tutor
-    with st.chat_message("assistant"):
-        st.markdown(respuesta.text)
-    st.session_state.messages.append({"role": "assistant", "content": respuesta.text})
+        st.write(response.text)
