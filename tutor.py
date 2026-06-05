@@ -67,21 +67,8 @@ st.divider()
 # 5. CARGADOR DE ARCHIVOS (FUNCIÓN PREMIUM DE FOTOS)
 foto_subida = st.file_uploader("📸 [PREMIUM] Sube la foto de tu ejercicio o tarea", type=["jpg", "jpeg", "png"])
 
-
-# 6. LÓGICA DEL CHAT INTERACTIVO CON BARRERA DE PAGO
-# Mostrar al usuario cuántos créditos le quedan
-creditos_restantes = LIMITE_GRATIS - st.session_state.mensajes_enviados
-
-if creditos_restantes > 0:
-    st.write(f"💡 Tienes **{creditos_restantes}** preguntas gratis restantes por hoy.")
-else:
-    st.error("🚨 Has agotado tus preguntas gratis de hoy. Para continuar chateando y usando el lector de fotos, activa tu Plan Premium en la barra lateral.")
-
 # El chat solo se activa si le quedan créditos libres
-if prompt := st.chat_input("Escribe tu pregunta aquí...", disabled=(creditos_restantes <= 0)):
-    
-    # Sumar 1 al contador de mensajes del usuario
-    st.session_state.mensajes_enviados += 1
+if prompt := st.chat_input("Escribe tu pregunta aquí..."), disabled=(creditos_restantes <= 0)):
     
     # Inicializar el cliente de Gemini
     client = genai.Client(api_key=API_KEY)
@@ -122,5 +109,5 @@ if prompt := st.chat_input("Escribe tu pregunta aquí...", disabled=(creditos_re
         )
         st.write(response.text)
         
-    # Forzar actualización de la página para refrescar el contador de créditos
-    st.rerun()
+    # Sumar el crédito consumido AL FINAL, para que no interfiera con la respuesta en pantalla
+    st.session_state.mensajes_enviados += 1
