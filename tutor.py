@@ -68,10 +68,17 @@ st.divider()
 foto_subida = st.file_uploader("📸 [PREMIUM] Sube la foto de tu ejercicio o tarea", type=["jpg", "jpeg", "png"])
 
 # El chat solo se activa si le quedan créditos libres
-if prompt := st.chat_input("Escribe tu pregunta aquí..."), disabled=(creditos_restantes <= 0)):
+creditos_restantes = LIMITE_GRATIS - st.session_state.mensajes_enviados
+
+if creditos_restantes > 0:
+    st.write(f"💡 Tienes **{creditos_restantes}** preguntas gratis restantes por hoy.")
+else:
+    st.error("🚨 Has agotado tus preguntas gratis de hoy. Para continuar chateando y usando el lector de fotos, activa tu Plan Premium en la barra lateral.")
+
+if prompt := st.chat_input("Escribe tu pregunta aquí...", disabled=(creditos_restantes <= 0)):
     
     # Inicializar el cliente de Gemini
-    client = genai.Client(api_key=API_KEY)
+    client = genai.Client(api_key=st.secrets["API_KEY"])
     
     # CASO 1: El usuario subió una foto (Función Premium)
     if foto_subida is not None:
@@ -94,7 +101,7 @@ if prompt := st.chat_input("Escribe tu pregunta aquí..."), disabled=(creditos_r
         )
         st.success("🤖 Respuesta del Tutor Premium:")
         st.write(response.text)
-
+        st.rerun()
     # CASO 2: Es una pregunta normal de texto (Abierto para todos)
     else:
         response = client.models.generate_content(
@@ -108,6 +115,7 @@ if prompt := st.chat_input("Escribe tu pregunta aquí..."), disabled=(creditos_r
             )
         )
         st.write(response.text)
-        
+        st.rerun()
+    
     # Sumar el crédito consumido AL FINAL, para que no interfiera con la respuesta en pantalla
     st.session_state.mensajes_enviados += 1
