@@ -88,16 +88,17 @@ if prompt := st.chat_input("Escribe tu pregunta aquí...", disabled=(creditos_re
         
         contenido_bomba = [prompt, imagen]
         
+        # CAMBIA ESTE BLOQUE DE ABAJO
         response = client.models.generate_content(
             model='gemini-2.5-flash',
             contents=contenido_bomba,
-            config=genai.types.GenerateContentConfig(
-                system_instruction="""
-                Eres Tutor IA, una Inteligencia Artificial de mentoría universitaria de élite, experta en absolutamente todas las áreas del conocimiento del mundo.
-                REGLA CRÍTICA: Está ABSOLUTAMENTE PROHIBIDO dar la respuesta directa al inicio. Tu objetivo es guiar pedagógicamente al estudiante paso a paso para que él razone y aprenda.
-                Estructura tus respuestas de forma impecable: usa títulos limpios, listas con viñetas, tablas estructuradas si manejas números, y resalta conceptos clave en **negritas**.
-                """
-            )
+            config={
+                'system_instruction': (
+                    "Eres Tutor IA, una Inteligencia Artificial de mentoría universitaria de élite, experta en todas las áreas del conocimiento. "
+                    "REGLA CRÍTICA: Está ABSOLUTAMENTE PROHIBIDO dar la respuesta directa al inicio. Tu objetivo es guiar pedagógicamente al estudiante paso a paso para que él razone y aprenda. "
+                    "Estructura tus respuestas de forma impecable: usa títulos limpios, listas con viñetas, tablas estructuradas si manejas números, y resalta conceptos clave en **negritas**."
+                )
+            }
         )
         st.success("🤖 Respuesta del Tutor Premium:")
         st.write(response.text)
