@@ -101,21 +101,15 @@ if prompt := st.chat_input("Escribe tu pregunta aquí...", disabled=(creditos_re
         )
         st.success("🤖 Respuesta del Tutor Premium:")
         st.write(response.text)
-        st.rerun()
+        
     # CASO 2: Es una pregunta normal de texto (Abierto para todos)
     else:
         response = client.models.generate_content(
             model='gemini-2.5-flash',
-            contents=[prompt],
-            config=genai.types.GenerateContentConfig(
-                system_instruction="""
-                Eres Tutor IA, una Inteligencia Artificial de mentoría universitaria de élite. 
-                Explica de forma clara, didáctica, usando negritas y listas estructuradas para ayudar al estudiante.
-                """
-            )
+            contents=prompt,
+            config={'system_instruction': "Eres Tutor IA, un mentor universitario de élite. Explica de forma clara, didáctica, usando negritas y listas estructuradas."}
         )
         st.write(response.text)
-        st.rerun()
     
     # Sumar el crédito consumido AL FINAL, para que no interfiera con la respuesta en pantalla
     st.session_state.mensajes_enviados += 1
